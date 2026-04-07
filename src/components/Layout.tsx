@@ -145,7 +145,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             <div className="h-px bg-gradient-to-r from-red-500 via-red-700 to-red-900 opacity-30 mb-8" />
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-gray-500 text-sm">© 2025 The Rotisserie. All rights reserved.</div>
+              <div className="text-gray-500 text-sm">
+  © 2025{" "}
+  <a
+    href="https://aaot.vercel.app"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="underline decoration-dotted"
+  >
+    AAOT
+  </a>.
+</div>
             </div>
           </div>
 
