@@ -103,7 +103,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   {t("footer.locationTitle")}
                 </h3>
                 <a
-                  href="https://www.google.com/maps/dir//Sydenham+Station,+Marrickville+NSW+2204"
+                  href="https://maps.app.goo.gl/VZxajTY5vTgBPx5q8"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-red-500 transition-colors block"
@@ -147,14 +147,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-gray-500 text-sm">
   © 2025{" "}
-  <a
-    href="https://aaot.vercel.app"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="underline decoration-dotted"
-  >
-    AAOT
-  </a>.
+  N5m.
 </div>
             </div>
           </div>
