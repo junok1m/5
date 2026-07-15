@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import { ArrowLeft } from "lucide-react";
 
@@ -26,6 +26,9 @@ const NewsPostPage: React.FC = () => {
   const [post, setPost] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const handleBack = () => {
+    navigate("/", { replace: true });
+  };
 
   useEffect(() => {
     if (!newsId || Number.isNaN(newsId)) {
@@ -62,11 +65,10 @@ const NewsPostPage: React.FC = () => {
         {/* Back button (same vibe as NewsPage) */}
         <div className="p-6">
           <button
-            onClick={() => navigate("/news")}
-            className="inline-flex items-center gap-2 text-red-400 hover:text-red-300
-              transition-all duration-300 uppercase tracking-wider text-sm cursor-pointer"
+            onClick={handleBack}
+            className="inline-flex cursor-pointer items-center gap-2 text-sm uppercase tracking-wider text-red-400 transition-all duration-300 hover:text-red-300"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back
           </button>
         </div>
@@ -79,9 +81,14 @@ const NewsPostPage: React.FC = () => {
 
         {!loading && errorMsg && (
           <div className="px-6 pb-12">
-            <Link to="/news" className="text-white/70 hover:text-white">
-              ← Back to News
-            </Link>
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 text-white/70 transition hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </button>
+
             <p className="mt-6 text-red-300">{errorMsg}</p>
           </div>
         )}

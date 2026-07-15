@@ -1,7 +1,7 @@
 // src/components/RosterCard.tsx
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { RosterModel } from "../lib/roster/providerMap";
 
@@ -12,13 +12,18 @@ type Props = {
 
 const RosterCard: React.FC<Props> = ({ model, natLabel }) => {
   const { t } = useTranslation();
+  const location = useLocation();
 
   return (
     <Link
-      to={`/profile/${model.slug}`}
-      className="relative aspect-[3/4] overflow-hidden group block"
-      style={{ boxShadow: "inset 0 0 0 1px rgba(255,0,255,0.2)" }}
-    >
+  to={`/profile/${model.slug}`}
+  state={{
+    backgroundLocation: location,
+    workingTime: model.workingTime,
+  }}
+  className="relative aspect-[3/4] overflow-hidden group block"
+  style={{ boxShadow: "inset 0 0 0 1px rgba(255,0,255,0.2)" }}
+>
       <img
         src={model.image}
         alt={model.name}

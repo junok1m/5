@@ -1,12 +1,16 @@
 // src/components/RosterGrid.tsx
 
 import React, { useCallback, useMemo } from "react";
-import { Filter, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import RosterCard from "./RosterCard";
+import RosterToolbar from "./roster/RosterToolbar";
+import RosterFilters from "./roster/RosterFilters";
+import RosterMessages from "./roster/RosterMessages";
+
 import { useRosterData } from "../hooks/useRosterData";
 import { useRosterParams } from "../hooks/useRosterParams";
+
 
 import {
   buildProvidersIndex,
@@ -53,16 +57,22 @@ const RosterGrid: React.FC = () => {
   // ✅ shop "business day" starts at 10:00 and runs until 03:00 next day
   const SHOP_DAY_START_HOUR = 10;
 
-  const rosterDay = useMemo(() => {
+  const shopToday = useMemo(() => {
     const now = new Date();
     const calendarToday = startOfDay(now);
 
-    // 00:00–09:59 belongs to yesterday's shop day
-    const shopToday = now.getHours() < SHOP_DAY_START_HOUR ? addDays(calendarToday, -1) : calendarToday;
+    return now.getHours() < SHOP_DAY_START_HOUR
+      ? addDays(calendarToday, -1)
+      : calendarToday;
+  }, []);
 
-    // today tab => shopToday, tomorrow tab => shopToday + 1
-    return tab === "tomorrow" ? addDays(shopToday, 1) : shopToday;
-  }, [tab]);
+  const shopTomorrow = useMemo(
+    () => addDays(shopToday, 1),
+    [shopToday],
+  );
+
+  const rosterDay =
+    tab === "tomorrow" ? shopTomorrow : shopToday;
 
   const shuffleKey = useMemo(() => {
     return ["n5m", tab, time, nat.join("|"), svc.join("|")].join("::");
@@ -101,9 +111,22 @@ const RosterGrid: React.FC = () => {
   }, [currentRoster, shuffleKey]);
 
   const timeFilteredRoster = useMemo(() => {
-    return randomizedRoster.filter((m) => {
-      if (!m.startTime || !m.endTime) return true;
-      return getShiftStatusOnDay(m.startTime, m.endTime, rosterDay) === time;
+    if (time === "all") {
+      return randomizedRoster;
+    }
+
+    return randomizedRoster.filter((model) => {
+      if (!model.startTime || !model.endTime) {
+        return false;
+      }
+
+      return (
+        getShiftStatusOnDay(
+          model.startTime,
+          model.endTime,
+          rosterDay,
+        ) === "now"
+      );
     });
   }, [randomizedRoster, time, rosterDay]);
 
@@ -163,149 +186,58 @@ const RosterGrid: React.FC = () => {
       "No girls match your current time or filters. Try switching the time filter or clearing filters.",
   });
 
-  // ---------- shared styles ----------
-  const selectedBtn = "bg-red-900 border-red-900 text-white";
-  const unselectedBtn = "bg-transparent border-red-900 text-zinc-300 hover:text-white hover:bg-white/5";
-  const subtleInnerHighlight = "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]";
-
   return (
     <section className="min-h-screen bg-black relative overflow-hidden py-12">
       <div className="relative z-10 w-full">
-        {apiError && (
-          <div className="mx-6 mb-4 p-3 border border-red-900 bg-red-900/10 text-zinc-200 text-sm">
-            API error: {apiError}
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 justify-center">
-          <button
-            onClick={() => commitParams({ tab: "today" })}
-            className={`px-6 py-3 font-bold text-2xl border transition-colors ${
-              tab === "today" ? `${selectedBtn} ${subtleInnerHighlight}` : unselectedBtn
-            }`}
-          >
-            {t("roster.today")}
-          </button>
-
-          <button
-            onClick={() => commitParams({ tab: "tomorrow" })}
-            className={`px-6 py-3 font-bold text-2xl border transition-colors ${
-              tab === "tomorrow" ? `${selectedBtn} ${subtleInnerHighlight}` : unselectedBtn
-            }`}
-          >
-            {t("roster.tomorrow")}
-          </button>
-        </div>
-
-        {showTomorrowReleaseMsg && (
-          <div className="mx-6 mb-6 p-4 border border-red-900 bg-red-900/10 text-zinc-100 text-center">
-            {t("roster.tomorrowReleaseTitle", { time: "7:00 PM" })}
-            <div className="text-zinc-300 mt-1">{t("roster.tomorrowReleaseSubtitle")}</div>
-          </div>
-        )}
-
-        {isLoading && (
-          <div className="mx-6 mb-8 p-6 border border-red-900 bg-red-900/10 text-center">
-            <div className="text-zinc-100 text-xl font-bold">{t("roster.loadingTitle")}</div>
-            <div className="text-zinc-400 mt-2">{t("roster.loadingSubtitle")}</div>
-          </div>
-        )}
+        <RosterMessages
+          apiError={apiError}
+          isLoading={isLoading}
+          showTomorrowReleaseMsg={showTomorrowReleaseMsg}
+          showEmpty={
+            !isLoading &&
+            !showTomorrowReleaseMsg &&
+            filteredRoster.length === 0
+          }
+          emptyText={emptyText}
+          onClearFilters={clearFilters}
+        />
 
         {!showTomorrowReleaseMsg && (
-          <div className="flex items-center gap-3 mx-6 mb-6">
-            {/* Filters toggle */}
-            <button
-              onClick={() => commitParams({ filters: !showFilters })}
-              className={`flex items-center gap-2 px-4 py-2 text-xl border transition-colors ${
-                showFilters ? `${selectedBtn} ${subtleInnerHighlight}` : unselectedBtn
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              {t("filter.filters")}
-              {activeFilterCount > 0 && (
-                <span className="ml-1 px-2 py-0.5 text-xs rounded-full border border-white/20 bg-white/10 text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-
-            {/* Time filter (always “active control”, keep selected styling) */}
-            <button
-              onClick={() => {
-                const order: Array<"now" | "later" | "finished"> = ["now", "later", "finished"];
-                const idx = order.indexOf(time);
-                const next = order[(idx + 1) % order.length];
-                commitParams({ time: next });
-              }}
-              className={`flex items-center gap-2 px-4 py-2 text-xl border transition-colors ${selectedBtn} ${subtleInnerHighlight}`}
-              title="Time filter"
-            >
-              <Clock className="w-4 h-4" />
-              {time === "now"
-                ? t("filter.onNow")
-                : time === "later"
-                ? t("filter.startLater")
-                : t("filter.finished")}
-            </button>
-          </div>
+          <RosterToolbar
+            tab={tab}
+            todayDate={shopToday}
+            tomorrowDate={shopTomorrow}
+            showFilters={showFilters}
+            activeFilterCount={activeFilterCount}
+            time={time}
+            onTabChange={(nextTab) =>
+              commitParams({ tab: nextTab })
+            }
+            onToggleFilters={() =>
+              commitParams({ filters: !showFilters })
+            }
+            onToggleTime={() =>
+              commitParams({
+                time: time === "all" ? "now" : "all",
+              })
+            }
+          />
         )}
 
-        {showFilters && (
-          <div className="mb-6 p-4 bg-black/40 border border-red-900 mx-6">
-            <div className="flex justify-end items-center mb-4">
-              <button onClick={clearFilters} className="text-lg text-zinc-400 hover:text-white">
-                {t("filter.clear")}
-              </button>
-            </div>
-
-            <div className="mb-4">
-              <h4 className="text-white font-bold mb-2">{t("filter.nationality")}</h4>
-              <div className="flex flex-wrap gap-2">
-                {nationalities.map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => toggleNationality(n)}
-                    className={`px-3 py-1 border transition-colors ${
-                      nat.includes(n) ? `${selectedBtn} ${subtleInnerHighlight}` : unselectedBtn
-                    }`}
-                  >
-                    {natLabel(n)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-white font-bold mb-2">{t("profile.availableServices")}</h4>
-              <div className="flex flex-wrap gap-2">
-                {serviceFilterLabels.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => toggleService(s)}
-                    className={`px-3 py-1 border transition-colors ${
-                      svc.includes(s) ? `${selectedBtn} ${subtleInnerHighlight}` : unselectedBtn
-                    }`}
-                  >
-                    {t(`services.${serviceKey(s)}`)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {!isLoading && !showTomorrowReleaseMsg && filteredRoster.length === 0 && (
-          <div className="mx-6 mb-10 p-8 border border-red-900/20 bg-black/40 text-center">
-            <p className="text-zinc-300 text-xl">{emptyText}</p>
-            <button
-              onClick={clearFilters}
-              className="mt-6 px-6 py-2 border border-red-900 text-zinc-200 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              {t("filter.clear")}
-            </button>
-          </div>
-        )}
+        <RosterFilters
+          show={showFilters}
+          nationalities={nationalities}
+          selectedNationalities={nat}
+          onToggleNationality={toggleNationality}
+          natLabel={natLabel}
+          services={serviceFilterLabels}
+          selectedServices={svc}
+          onToggleService={toggleService}
+          serviceLabel={(service) =>
+            t(`services.${serviceKey(service)}`)
+          }
+          onClear={clearFilters}
+        />
 
         {/* Grid */}
         <div className="w-full px-0">

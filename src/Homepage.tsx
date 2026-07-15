@@ -1,75 +1,68 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import Layout from "./components/Layout";
-import BannerSwipe from "./components/BannerSwipe";
-import RosterGrid from "./components/RosterGrid";
+import { Link, useLocation } from "react-router-dom";
 
-/* ---------------- Types ---------------- */
+import Layout from "./components/Layout";
+import RosterGrid from "./components/RosterGrid";
 
 interface NewsItem {
   id: number;
   title: string;
   publish_date: string;
   is_public: boolean;
-  media: { id: number; file_url: string; file_type: string }[];
 }
-
-interface Banner {
-  id: number;
-  image: string;
-  title: string;
-  newsId?: number;
-}
-
-/* ---------------- API ---------------- */
 
 const NEWS_URL = "/api/news/";
 
-/* ---------------- Helpers ---------------- */
-
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`${url} -> ${res.status} ${res.statusText}`);
+
+  if (!res.ok) {
+    throw new Error(`${url} -> ${res.status} ${res.statusText}`);
+  }
+
   return res.json();
 }
 
-function scrollContainerToRoster(): boolean {
-  const container = document.getElementById("app-scroll");
+function scrollToRoster(): boolean {
   const roster = document.getElementById("roster");
-  if (!container || !roster) return false;
 
-  const cRect = container.getBoundingClientRect();
-  const rRect = roster.getBoundingClientRect();
-  const top = container.scrollTop + (rRect.top - cRect.top);
+  if (!roster) return false;
 
-  container.scrollTo({ top, behavior: "smooth" });
+  roster.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
   return true;
 }
 
-/* ---------------- Component ---------------- */
-
 const Homepage: React.FC = () => {
   const location = useLocation();
-  const [banners, setBanners] = useState<Banner[]>([]);
 
-  // Scroll to roster (hash or state)
+  const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
+
   useEffect(() => {
     const shouldGoRoster =
-      location.hash === "#roster" || location.state?.scrollTo === "roster";
+      location.hash === "#roster" ||
+      location.state?.scrollTo === "roster";
+
     if (!shouldGoRoster) return;
 
     let tries = 0;
 
     const tick = () => {
       tries += 1;
-      const ok = scrollContainerToRoster(); // ✅ re-check each frame
-      if (!ok && tries < 5) requestAnimationFrame(tick);
+
+      const didScroll = scrollToRoster();
+
+      if (!didScroll && tries < 5) {
+        requestAnimationFrame(tick);
+      }
     };
 
     requestAnimationFrame(tick);
   }, [location.hash, location.state]);
 
-  // Fetch news banners
   useEffect(() => {
     let cancelled = false;
 
@@ -77,20 +70,20 @@ const Homepage: React.FC = () => {
       .then((items) => {
         if (cancelled) return;
 
-        const mapped: Banner[] = (items || [])
-          .filter((x) => x.is_public)
-          .sort((a, b) => +new Date(b.publish_date) - +new Date(a.publish_date))
-          .map((x) => ({
-            id: x.id,
-            image: x.media?.[0]?.file_url || "",
-            title: x.title,
-            newsId: x.id,
-          }))
-          .filter((b) => b.image);
+        const latest = (items ?? [])
+          .filter((item) => item.is_public)
+          .sort(
+            (a, b) =>
+              new Date(b.publish_date).getTime() -
+              new Date(a.publish_date).getTime(),
+          )
+          .slice(0, 3);
 
-        setBanners(mapped);
+        setLatestNews(latest);
       })
-      .catch((err) => console.error("Failed to load news banners", err));
+      .catch((error) => {
+        console.error("Failed to load latest news", error);
+      });
 
     return () => {
       cancelled = true;
@@ -99,17 +92,42 @@ const Homepage: React.FC = () => {
 
   return (
     <Layout>
-      {/* Banner */}
-      <section className="min-h-screen">
-        {banners.length > 0 ? (
-          <BannerSwipe banners={banners} />
-        ) : (
-          <div className="min-h-screen w-full bg-black" />
-        )}
+      <section className="bg-black px-4 py-8 text-white">
+        <div className="mt-10 mx-auto max-w-6xl">
+          <div className="mb-6">
+            <h2
+              className="text-xl font-semibold text-white"
+              style={{
+                textShadow: "0 0 4px rgba(127, 29, 29, 0.25)",
+              }}
+            >
+              Latest from N5M
+            </h2>
+
+            <div className="mt-2 h-px w-16 bg-red-700/60" />
+          </div>
+
+          <div className="divide-y divide-white/10 border-b border-white/10">
+            {latestNews.map((item) => (
+              <Link
+                key={item.id}
+                to={`/news/${item.id}`}
+                className="flex items-center justify-between gap-4 py-4 transition hover:text-[#e8d6a8]"
+              >
+                <span className="line-clamp-1 text-sm">
+                  {item.title}
+                </span>
+
+                <span className="shrink-0 text-white/35">
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* Roster */}
-      <section id="roster" className="min-h-screen">
+      <section id="roster">
         <RosterGrid />
       </section>
     </Layout>

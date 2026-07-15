@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { Phone, MapPin, Clock, Link2 } from "lucide-react";
-import { Link, useLocation, useNavigationType } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 interface LayoutProps {
@@ -9,53 +9,10 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const navType = useNavigationType(); // POP / PUSH / REPLACE
-
-  const mainRef = useRef<HTMLElement | null>(null);
-
-  // ✅ Keep per route + query (filters), but DON'T split by hash
-  const scrollKey = `scroll:${location.pathname}${location.search}`;
-
-  // ✅ Restore ONLY on browser back/forward (POP)
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return;
-    if (navType !== "POP") return;
-
-    const saved = sessionStorage.getItem(scrollKey);
-    el.scrollTop = saved != null ? Number(saved) || 0 : 0;
-  }, [scrollKey, navType]);
-
-  // ✅ Throttle storage writes (avoid writing on every scroll event)
-  const rafRef = useRef<number | null>(null);
-
-  const handleScroll = useCallback(() => {
-    const el = mainRef.current;
-    if (!el) return;
-
-    if (rafRef.current != null) return;
-
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      sessionStorage.setItem(scrollKey, String(el.scrollTop));
-    });
-  }, [scrollKey]);
-
-  useEffect(() => {
-    return () => {
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <main
-        id="app-scroll"
-        ref={mainRef}
-        onScroll={handleScroll}
-        className="h-screen overflow-y-scroll"
-      >
+      <main>
         {children}
 
         <footer
@@ -146,9 +103,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="h-px bg-gradient-to-r from-red-500 via-red-700 to-red-900 opacity-30 mb-8" />
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-gray-500 text-sm">
-  © 2025{" "}
-  N5m.
-</div>
+                © 2025{" "}
+                N5m.
+              </div>
             </div>
           </div>
 
