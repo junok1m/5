@@ -102,7 +102,7 @@ const ProfileGallery: React.FC<Props> = ({ name, images, isNew = false, classNam
             <button
               type="button"
               onClick={prevImage}
-              className="absolute left-0 top-1/2 -translate-y-1/2 px-4 py-4 bg-black/70 border border-red-900 text-white hover:bg-white/5 transition-colors"
+              className="absolute left-0 top-1/2 -translate-y-1/2 px-4 py-4 bg-black/70 border border-red-900 text-white transition-colors"
               aria-label="Previous photo"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -111,7 +111,7 @@ const ProfileGallery: React.FC<Props> = ({ name, images, isNew = false, classNam
             <button
               type="button"
               onClick={nextImage}
-              className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-4 bg-black/70 border border-red-900 text-white hover:bg-white/5 transition-colors"
+              className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-4 bg-black/70 border border-red-900 text-white transition-colors"
               aria-label="Next photo"
             >
               <ChevronRight className="w-6 h-6" />
