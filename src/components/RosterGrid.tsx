@@ -202,7 +202,6 @@ const RosterGrid: React.FC = () => {
           onClearFilters={clearFilters}
         />
 
-        {!showTomorrowReleaseMsg && (
           <RosterToolbar
             tab={tab}
             todayDate={shopToday}
@@ -222,7 +221,6 @@ const RosterGrid: React.FC = () => {
               })
             }
           />
-        )}
 
         <RosterFilters
           show={showFilters}
