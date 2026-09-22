@@ -54,8 +54,8 @@ const RosterGrid: React.FC = () => {
       .filter(Boolean) as RosterModel[];
   }, [tab, apiToday, apiTomorrow, providers, providersIndex]);
 
-  // ✅ shop "business day" starts at 10:00 and runs until 03:00 next day
-  const SHOP_DAY_START_HOUR = 10;
+  // Roster business day rolls over at 05:00, after the 04:00 closing time.
+  const SHOP_DAY_START_HOUR = 5;
 
   const shopToday = useMemo(() => {
     const now = new Date();
@@ -141,7 +141,7 @@ const RosterGrid: React.FC = () => {
         timeFilteredRoster
           .flatMap((m) => (m.services || []).filter((s) => s.available).map((s) => s.name))
           .filter(Boolean)
-      ),
+      )
     ].sort();
   }, [timeFilteredRoster]);
 
