@@ -4,10 +4,8 @@ import React from "react";
 import {
   useLocation,
   useNavigate,
-  useParams,
 } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
 import Layout from "./components/Layout";
 import ModelProfileContent from "./components/profile/ModelProfileContent";
@@ -19,23 +17,11 @@ interface ProfileLocationState {
 const ModelProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { slug } = useParams<{ slug: string }>();
-
-  const { t, i18n } = useTranslation();
-  
 
   const state =
     location.state as ProfileLocationState | null;
 
   const workingTimeFromState = state?.workingTime;
-
-  const natLabel = (raw: string) => {
-    const key = `nationalities.${raw}`;
-
-    return i18n.exists(key)
-      ? t(key)
-      : raw;
-  };
 
   const handleBack = () => {
     if (window.history.state?.idx > 0) {
@@ -56,10 +42,6 @@ const ModelProfilePage: React.FC = () => {
       },
     );
   };
-
-  
-
-  
 
   return (
     <Layout>
