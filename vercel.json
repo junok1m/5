@@ -1,3 +1,7 @@
 {
-  "rewrites": []
+  "routes": [
+    { "src": "/api/(.*)", "dest": "https://n5m.au/api/$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
