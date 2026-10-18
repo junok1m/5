@@ -151,7 +151,7 @@ function ModelProfileModal() {
         </div>
 
         {/* Entire profile scrolls */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain touch-pan-y">
           <ModelProfileContent
             workingTime={workingTime}
             variant="modal"
