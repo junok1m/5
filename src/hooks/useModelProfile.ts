@@ -40,6 +40,10 @@ type ApiProvider = {
   requirements?: string;
 
   is_new?: boolean;
+  Medical?: boolean;
+  medical?: boolean;
+  service_medical?: boolean;
+  extra_services?: Array<string | { name?: string; label?: string; available?: boolean; enabled?: boolean }>;
 
   service_bbbj?: boolean;
   service_cim?: boolean;
@@ -84,6 +88,7 @@ export type ModelProfile = {
 
   images: string[];
   isNew: boolean;
+  medicalCheckup: boolean;
 
   workingTime?: string;
 
@@ -349,6 +354,20 @@ export function useModelProfile(slug?: string) {
 
           images,
           isNew: found.is_new === true,
+          medicalCheckup:
+            found.Medical === true ||
+            found.medical === true ||
+            found.service_medical === true ||
+            (Array.isArray(found.extra_services) &&
+              found.extra_services.some((service) =>
+                typeof service === "string"
+                  ? service.trim().toLowerCase() === "medical" ||
+                    service.trim().toLowerCase() === "medical check-up"
+                  : (service.name || service.label || "").trim().toLowerCase() === "medical" ||
+                    (service.name || service.label || "").trim().toLowerCase() === "medical check-up"
+                    ? service.available === true || service.enabled === true
+                    : false
+              )),
           workingTime: apiWorkingTime,
           services,
 
