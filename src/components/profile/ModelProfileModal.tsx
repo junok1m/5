@@ -78,7 +78,7 @@ function ModelProfileModal() {
         fixed inset-0 z-[100]
         flex items-center justify-center
         bg-black/75
-        p-3 sm:p-6
+        p-3 sm:p-6 md:p-8
       "
       onClick={closeModal}
     >
@@ -94,6 +94,9 @@ function ModelProfileModal() {
           bg-black
           shadow-[0_0_40px_rgba(127,29,29,0.3)]
           sm:h-[calc(100dvh-48px)]
+          md:h-[min(88dvh,900px)]
+          md:max-w-[760px]
+          lg:max-w-[1080px]
         "
         onClick={(event) =>
           event.stopPropagation()
@@ -150,8 +153,8 @@ function ModelProfileModal() {
           </div>
         </div>
 
-        {/* Entire profile scrolls */}
-        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain touch-pan-y">
+        {/* Mobile keeps the existing full-profile scroll. Larger screens split gallery and details. */}
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain touch-pan-y md:overflow-hidden">
           <ModelProfileContent
             workingTime={workingTime}
             variant="modal"
