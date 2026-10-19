@@ -70,7 +70,13 @@ const ModelProfileContent: React.FC<ModelProfileContentProps> = ({
   const content = (
     <>
       {/* Gallery */}
-      <div className="space-y-6">
+      <div
+        className={
+          variant === "modal"
+            ? "space-y-6 md:w-[42%] md:shrink-0 md:overflow-y-auto md:border-r md:border-red-900/30 md:px-6 md:py-6"
+            : "space-y-6"
+        }
+      >
         <ProfileGallery
           name={model.name}
           images={model.images}
@@ -79,7 +85,13 @@ const ModelProfileContent: React.FC<ModelProfileContentProps> = ({
       </div>
 
       {/* Information */}
-      <div className="mx-auto flex w-full max-w-[520px] flex-col gap-10">
+      <div
+        className={
+          variant === "modal"
+            ? "mx-auto flex w-full max-w-[520px] flex-col gap-10 md:min-w-0 md:flex-1 md:overflow-x-hidden md:overflow-y-auto md:overscroll-contain md:px-6 md:py-6"
+            : "mx-auto flex w-full max-w-[520px] flex-col gap-10"
+        }
+      >
         <ProfileHeader
           name={model.name}
           workingTime={workingTime || model.workingTime}
@@ -116,8 +128,8 @@ const ModelProfileContent: React.FC<ModelProfileContentProps> = ({
 
   if (variant === "modal") {
     return (
-      <section className="bg-black px-4 pb-10 pt-4">
-        <div className="flex flex-col gap-8">
+      <section className="bg-black px-4 pb-10 pt-4 md:flex md:h-full md:min-h-0 md:flex-col md:overflow-hidden md:px-0 md:pb-0 md:pt-0">
+        <div className="flex flex-col gap-8 md:h-full md:min-h-0 md:flex-row md:gap-0">
           {content}
         </div>
       </section>
