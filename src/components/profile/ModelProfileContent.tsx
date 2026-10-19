@@ -121,6 +121,13 @@ const ModelProfileContent: React.FC<ModelProfileContentProps> = ({
               name={model.name}
             />
           )}
+
+          {model.medicalCheckup && (
+            <p className="text-xs font-medium text-emerald-500">
+              <span aria-hidden="true">✓</span>{" "}
+              Medical check-up
+            </p>
+          )}
         </div>
       </div>
     </>
