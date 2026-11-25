@@ -136,13 +136,13 @@ const ProfileGallery: React.FC<Props> = ({ name, images, isNew = false, classNam
 
       {/* Thumbnails */}
       {hasMany && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+        <div className="mt-3 grid grid-cols-4 gap-2 pb-2">
           {imageArray.map((img, index) => (
             <button
               key={index}
               type="button"
               onClick={() => setCurrentImageIndex(index)}
-              className={`flex-shrink-0 w-20 h-28 overflow-hidden transition-colors border ${
+              className={`w-full min-w-0 aspect-[5/7] overflow-hidden transition-colors border ${
                 index === currentImageIndex ? "border-red-900" : "border-zinc-800 hover:border-red-900/60"
               }`}
               aria-label={`Thumbnail ${index + 1}`}
