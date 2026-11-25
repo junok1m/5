@@ -18,8 +18,6 @@ type Props = {
 const ProfileHeader: React.FC<Props> = ({ name, workingTime, rates, className }) => {
   const { t } = useTranslation();
 
- 
-
   return (
     <div className={className}>
       {/* NAME aura */}
@@ -37,43 +35,28 @@ const ProfileHeader: React.FC<Props> = ({ name, workingTime, rates, className })
         )}
       </div>
 
-     {/* RATES */}
-<div className="mt-6">
+      {/* Rates wrap to fit the modal without horizontal scrolling */}
+      <div className="mt-6 flex flex-wrap justify-center gap-x-3 gap-y-2 px-2 text-center text-base leading-tight text-white/90">
+        {rates?.min30 && (
+          <span>
+            <span className="text-white/70">{t("rates.min30")}</span>{" "}
+            <span className="text-white/95">${rates.min30}</span>
+          </span>
+        )}
 
-  <div className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-    <p className="whitespace-nowrap text-white/90 text-base leading-none text-center">
-      {rates?.min30 && (
-        <>
-          <span className="text-white/70">{t("rates.min30")}</span>{" "}
-          <span className="text-white/95">${rates.min30}</span>
-        </>
-      )}
+        {rates?.min45 && (
+          <span>
+            <span className="text-white/70">{t("rates.min45")}</span>{" "}
+            <span className="text-white/95">${rates.min45}</span>
+          </span>
+        )}
 
-      {rates?.min45 && (
-        <>
-          <span className="mx-2 text-white/30">·</span>
-          <span className="text-white/70">{t("rates.min45")}</span>{" "}
-          <span className="text-white/95">${rates.min45}</span>
-        </>
-      )}
-
-      {rates?.min60 && (
-        <>
-          <span className="mx-2 text-white/30">·</span>
-          <span className="text-white/70">{t("rates.min60")}</span>{" "}
-          <span className="text-white/95">${rates.min60}</span>
-        </>
-      )}
-    </p>
-  </div>
-
-
-
-
-
-
-        {/* hairline */}
-      
+        {rates?.min60 && (
+          <span>
+            <span className="text-white/70">{t("rates.min60")}</span>{" "}
+            <span className="text-white/95">${rates.min60}</span>
+          </span>
+        )}
       </div>
     </div>
   );
