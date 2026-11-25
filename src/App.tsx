@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -26,10 +26,20 @@ interface RouteState {
 function ScrollToTop() {
   const location = useLocation();
   const state = location.state as RouteState | null;
+  const wasProfileModalOpen = useRef(false);
 
   useEffect(() => {
     // 모달을 열 때는 뒤의 로스터 위치를 유지
-    if (state?.backgroundLocation) return;
+    if (state?.backgroundLocation) {
+      wasProfileModalOpen.current = true;
+      return;
+    }
+
+    // 모달을 닫고 원래 페이지로 돌아올 때는 스크롤 위치를 유지
+    if (wasProfileModalOpen.current) {
+      wasProfileModalOpen.current = false;
+      return;
+    }
 
     // Homepage가 직접 roster 위치로 이동
     if (location.hash === "#roster") return;
