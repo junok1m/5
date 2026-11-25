@@ -1,6 +1,6 @@
 // src/components/RosterGrid.tsx
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import RosterCard from "./RosterCard";
@@ -19,7 +19,7 @@ import {
   type RosterModel,
 } from "../lib/roster/providerMap";
 
-import { addDays, getShiftStatusOnDay, startOfDay } from "../lib/roster/time";
+import { addDays, getShiftStatusOnDay } from "../lib/roster/time";
 
 function shuffle<T>(array: T[]) {
   const arr = [...array];
@@ -54,17 +54,42 @@ const RosterGrid: React.FC = () => {
       .filter(Boolean) as RosterModel[];
   }, [tab, apiToday, apiTomorrow, providers, providersIndex]);
 
-  // Roster business day rolls over at 05:00, after the 04:00 closing time.
-  const SHOP_DAY_START_HOUR = 5;
+  // The shop day runs from 3:00 AM to 2:59 AM Sydney time.
+  const SHOP_DAY_START_HOUR = 3;
+  const [now, setNow] = useState(() => new Date());
+
+  // Refresh the clock so the business day rolls over without a page reload.
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 15_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const shopToday = useMemo(() => {
-    const now = new Date();
-    const calendarToday = startOfDay(now);
+    const parts = new Intl.DateTimeFormat("en-AU", {
+      timeZone: "Australia/Sydney",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      hourCycle: "h23",
+    }).formatToParts(now);
 
-    return now.getHours() < SHOP_DAY_START_HOUR
-      ? addDays(calendarToday, -1)
-      : calendarToday;
-  }, []);
+    const values = Object.fromEntries(
+      parts
+        .filter((part) => part.type !== "literal")
+        .map((part) => [part.type, Number(part.value)])
+    );
+
+    const sydneyCalendarDay = new Date(
+      values.year,
+      values.month - 1,
+      values.day
+    );
+
+    return values.hour < SHOP_DAY_START_HOUR
+      ? addDays(sydneyCalendarDay, -1)
+      : sydneyCalendarDay;
+  }, [now]);
 
   const shopTomorrow = useMemo(
     () => addDays(shopToday, 1),
